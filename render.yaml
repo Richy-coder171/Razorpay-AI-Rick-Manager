@@ -34,8 +34,11 @@ services:
       # Set in the Render dashboard (secret): mongodb+srv://… Atlas free-tier URI
       - key: MONGODB_URI
         sync: false
+      # LLM provider: unset/empty = mock (safe default). Set to "gemini" with
+      # GEMINI_API_KEY, or "openrouter" with OPENROUTER_API_KEY, for the real
+      # LLM path (always behind the Agent Output Guard; falls back to mock).
       - key: LLM_PROVIDER
-        value: mock
+        sync: false
       # Optional (secret): set to enable the real OpenRouter LLM path
       - key: OPENROUTER_API_KEY
         sync: false
