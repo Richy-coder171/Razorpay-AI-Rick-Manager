@@ -15,9 +15,7 @@ export interface AppConfig {
   db_driver: 'mongo' | 'file';
   mongo_uri: string;
   data_dir: string;
-  llm_provider: 'openrouter' | 'gemini' | 'mock';
-  openrouter_api_key: string;
-  openrouter_model: string;
+  llm_provider: 'gemini' | 'mock';
   gemini_api_key: string;
   gemini_model: string;
   llm_timeout_ms: number;
@@ -38,13 +36,9 @@ export function loadConfig(): AppConfig {
     db_driver: (process.env.DB_DRIVER as 'mongo' | 'file') || 'file',
     mongo_uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/risk-manager',
     data_dir: process.env.DATA_DIR || './data',
-    llm_provider: (process.env.LLM_PROVIDER as 'openrouter' | 'gemini' | 'mock') || 'mock',
-    openrouter_api_key: process.env.OPENROUTER_API_KEY || '',
-    // Default: a FREE OpenRouter model (zero-cost tier, :free slug). Any model
-    // slug from https://openrouter.ai/models works via OPENROUTER_MODEL.
-    openrouter_model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
+    llm_provider: (process.env.LLM_PROVIDER as 'gemini' | 'mock') || 'mock',
     // Gemini (Google AI Studio key). Uses Gemini's OpenAI-compatible endpoint,
-    // so the provider is the same request shape as OpenRouter. Any model name
+    // so the provider is a plain chat/completions request. Any model name
     // from https://generativelanguage.googleapis.com works via GEMINI_MODEL.
     gemini_api_key: process.env.GEMINI_API_KEY || '',
     gemini_model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',

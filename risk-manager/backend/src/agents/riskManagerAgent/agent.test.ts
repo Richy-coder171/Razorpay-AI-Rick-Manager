@@ -54,21 +54,21 @@ describe('Risk Manager Agent', () => {
 
   it('falls back to deterministic escalation when the LLM provider throws', async () => {
     const brokenProvider = {
-      name: 'openrouter',
+      name: 'gemini',
       complete: async () => {
         throw new Error('api key invalid');
       },
     };
     const agent = new RiskManagerAgent(brokenProvider as never);
     const result = await agent.run(normalDetector);
-    // Broken openrouter -> mock fallback -> conservative output that escalates.
+    // Broken gemini -> mock fallback -> conservative output that escalates.
     expect(result.llm_used).toBe('mock');
     expect(result.agent_output!.escalate_to_human).toBe(true);
     expect(result.guard.accepted).toBe(true);
   });
 
   it('rejects unparseable LLM output with agent_output_rejected', async () => {
-    const gabber = { name: 'openrouter', complete: async () => 'I am not JSON at all' };
+    const gabber = { name: 'gemini', complete: async () => 'I am not JSON at all' };
     const agent = new RiskManagerAgent(gabber as never);
     const result = await agent.run(normalDetector);
     expect(result.failure_state).toBe('agent_output_rejected');

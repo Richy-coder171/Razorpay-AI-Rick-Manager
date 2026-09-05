@@ -21,7 +21,7 @@ import { validateAgentOutput, GuardResult } from './agentOutputGuard';
 export interface AgentRunResult {
   agent_output: AgentOutput | null;
   guard: GuardResult;
-  llm_used: 'openrouter' | 'gemini' | 'mock' | 'none';
+  llm_used: 'gemini' | 'mock' | 'none';
   failure_state?: string;
 }
 
@@ -54,8 +54,8 @@ export class RiskManagerAgent {
     const userPrompt = buildUserPrompt(detectorOutput, context);
     let raw: string;
 
-    const isRealProvider = this.provider.name === 'openrouter' || this.provider.name === 'gemini';
-    let llmUsed: 'openrouter' | 'gemini' | 'mock' = isRealProvider ? (this.provider.name as 'openrouter' | 'gemini') : 'mock';
+    const isRealProvider = this.provider.name === 'gemini';
+    let llmUsed: 'gemini' | 'mock' = isRealProvider ? 'gemini' : 'mock';
 
     try {
       raw = await this.provider.complete(SYSTEM_PROMPT, userPrompt);

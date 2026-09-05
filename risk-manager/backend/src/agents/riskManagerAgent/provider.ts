@@ -1,11 +1,10 @@
 /**
  * LLM Provider interface (§11). The LLM is a PURE FUNCTION: structured facts
  * in, structured opinion out. Zero tools, zero function-calling definitions,
- * zero database/payment access. OpenRouterProvider / GeminiProvider for the
- * real call, MockProvider as the deterministic rule-based fallback used when
- * the key is unset or the call fails/times out — the fallback ALWAYS
- * escalates, so a dead LLM degrades safety margin rather than removing
- * safety (§15).
+ * zero database/payment access. GeminiProvider for the real call, MockProvider
+ * as the deterministic rule-based fallback used when the key is unset or the
+ * call fails/times out — the fallback ALWAYS escalates, so a dead LLM
+ * degrades safety margin rather than removing safety (§15).
  */
 
 import { z } from 'zod';
@@ -31,59 +30,8 @@ export interface LLMProvider {
 }
 
 /**
- * OpenRouter provider — plain HTTPS call to the OpenAI-compatible
- * /api/v1/chat/completions endpoint (no SDK dependency). The API key is read
- * from config (OPENROUTER_API_KEY env var) and is NEVER hardcoded.
- */
-export class OpenRouterProvider implements LLMProvider {
-  readonly name = 'openrouter';
-
-  async complete(systemPrompt: string, userPrompt: string): Promise<string> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), config.llm_timeout_ms);
-
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          Authorization: `Bearer ${config.openrouter_api_key}`,
-          'Content-Type': 'application/json',
-          // Optional OpenRouter attribution headers (app ranking metadata only).
-          'X-OpenRouter-Title': 'Risk Manager',
-        },
-        body: JSON.stringify({
-          model: config.openrouter_model,
-          max_tokens: 1024,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        const body = await response.text().catch(() => '');
-        throw new Error(`OpenRouter API error ${response.status}: ${body.slice(0, 300)}`);
-      }
-
-      const payload = (await response.json()) as {
-        choices?: Array<{ message?: { content?: string } }>;
-      };
-      const text = payload.choices?.[0]?.message?.content ?? '';
-      if (!text) throw new Error('OpenRouter returned an empty completion');
-
-      logger.info({ model: config.openrouter_model, chars: text.length }, 'openrouter response received');
-      return text;
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-}
-
-/**
- * Gemini provider — same OpenAI-compatible chat/completions contract via
- * Google's compatibility endpoint (no SDK dependency). The API key is read
+ * Gemini provider — plain HTTPS call to Google's OpenAI-compatible
+ * chat/completions endpoint (no SDK dependency). The API key is read
  * from config (GEMINI_API_KEY env var) and is NEVER hardcoded.
  */
 export class GeminiProvider implements LLMProvider {
@@ -177,9 +125,6 @@ function extractDetectorJson(userPrompt: string): Record<string, unknown> | null
 }
 
 export function getProvider(): LLMProvider {
-  if (config.llm_provider === 'openrouter' && config.openrouter_api_key) {
-    return new OpenRouterProvider();
-  }
   if (config.llm_provider === 'gemini' && config.gemini_api_key) {
     return new GeminiProvider();
   }

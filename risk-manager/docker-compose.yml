@@ -30,7 +30,7 @@ services:
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     env_file:
-      # Optional: supply backend/.env with secrets (OPENROUTER_API_KEY, …).
+      # Optional: supply backend/.env with secrets (GEMINI_API_KEY, …).
       # Works from a clean checkout too — .env is gitignored and may be absent.
       - path: backend/.env
         required: false
@@ -44,7 +44,6 @@ services:
       DEMO_API_KEY: ${DEMO_API_KEY:-demo-key}
       REQUIRE_API_KEY: ${REQUIRE_API_KEY:-true}
       LLM_PROVIDER: ${LLM_PROVIDER:-mock}
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock}
     ports:

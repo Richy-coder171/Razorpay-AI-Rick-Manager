@@ -77,11 +77,7 @@ app.get('/api/health', (_req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     db_driver: config.db_driver,
-    llm_provider: (() => {
-      if (config.llm_provider === 'openrouter') return config.openrouter_api_key ? 'openrouter' : 'mock';
-      if (config.llm_provider === 'gemini') return config.gemini_api_key ? 'gemini' : 'mock';
-      return 'mock';
-    })(),
+    llm_provider: config.llm_provider === 'gemini' && config.gemini_api_key ? 'gemini' : 'mock',
     payment_provider: config.payment_provider,
     fraud_spike_calibration: CALIBRATION_SOURCE,
   });

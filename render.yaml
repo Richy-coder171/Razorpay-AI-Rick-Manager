@@ -35,15 +35,11 @@ services:
       - key: MONGODB_URI
         sync: false
       # LLM provider: unset/empty = mock (safe default). Set to "gemini" with
-      # GEMINI_API_KEY, or "openrouter" with OPENROUTER_API_KEY, for the real
-      # LLM path (always behind the Agent Output Guard; falls back to mock).
+      # GEMINI_API_KEY for the real LLM path (always behind the Agent Output
+      # Guard; falls back to mock on any failure).
       - key: LLM_PROVIDER
         sync: false
-      # Optional (secret): set to enable the real OpenRouter LLM path
-      - key: OPENROUTER_API_KEY
-        sync: false
-      # Optional (secret): set to enable the real Gemini LLM path (Google AI
-      # Studio key). If used, also override LLM_PROVIDER to "gemini".
+      # Optional (secret): Google AI Studio key enabling the real Gemini path
       - key: GEMINI_API_KEY
         sync: false
       - key: PAYMENT_PROVIDER

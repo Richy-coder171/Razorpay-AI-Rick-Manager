@@ -58,7 +58,7 @@ Irreversible actions require high confidence and a probability above the module'
 
 ## Tech Stack
 
-- **Backend:** Node.js 18+, Express 4, TypeScript 5.5 (strict), ts-node-dev, Jest + ts-jest + supertest, Zod, pino, helmet, CORS allowlist, express-rate-limit, optional MongoDB (`mongodb` v6, JSON-file fallback), OpenRouter (zero-dependency HTTPS client, free-tier model default).
+- **Backend:** Node.js 18+, Express 4, TypeScript 5.5 (strict), ts-node-dev, Jest + ts-jest + supertest, Zod, pino, helmet, CORS allowlist, express-rate-limit, optional MongoDB (`mongodb` v6, JSON-file fallback), Gemini via Google's OpenAI-compatible endpoint (zero-dependency HTTPS client, `gemini-2.0-flash` default).
 - **Shared contracts:** `@risk-manager/shared` (workspace `file:` dependency) — the canonical snake_case types and runtime allowlists (`MODULE_ACTION_ALLOWLIST`, `IRREVERSIBLE_ACTIONS`), imported by **both backend and frontend** so the two cannot silently drift again.
 - **Frontend:** React 18 + TypeScript, Vite 5, React Router 6, Tailwind CSS 3, Recharts (volume chart on Fraud Monitor), Vitest (7 API-contract tests in `api.test.ts`; no component tests yet).
 - **Orchestration:** `concurrently` runs backend + frontend with one command.
@@ -183,7 +183,7 @@ Base URL: `http://localhost:3001`. **Auth:** demo `x-api-key` header (`DEMO_API_
 | **Return Risk Detector** | `detectors/returnRisk/` | Explainable weighted scorecard (base 0.10; COD +0.25, value ≥ ₹5000 +0.15, ≥2 prior returns +0.25, failed delivery +0.12, low serviceability +0.10, new customer +0.08, account age < 30d +0.05). |
 | **Abuse Ring Detector** | `detectors/abuseRing/` | Union-find graph clustering over 6 shared-attribute signal types; ring score from cluster size, distinct signals, edge density; no ban action exists. Output carries the per-member `shared_attributes` (graph edges, hashed values only) + `anchor_account_id`, rendered as the cluster graph on the Abuse Rings page. |
 | **Chargeback Assessor** | `detectors/chargeback/` | Win probability = reason-code base rate × evidence completeness; `missing_evidence_types` by set difference; exports the single `REQUIRED_EVIDENCE_BY_REASON` taxonomy shared with policy config. |
-| **Risk Manager Agent** | `agents/riskManagerAgent/` | Interprets detector output via LLM (MockProvider default; OpenRouter when configured — any model on openrouter.ai, free-tier default, zero-dependency HTTPS client). Skipped entirely on detector failure — deterministic escalation instead. Mock fallback on any LLM failure (`llm_unavailable`). |
+| **Risk Manager Agent** | `agents/riskManagerAgent/` | Interprets detector output via LLM (MockProvider default; Gemini when configured — Google AI Studio key, OpenAI-compatible endpoint, zero-dependency HTTPS client, `gemini-2.0-flash` default). Skipped entirely on detector failure — deterministic escalation instead. Mock fallback on any LLM failure (`llm_unavailable`). |
 | **Agent Output Guard** | `agents/riskManagerAgent/agentOutputGuard.ts` | Rejects: schema violations, probability drift beyond 2 decimals, confidence mismatch, fabricated evidence ids, actions outside the module allowlist. |
 | **Policy Engine** | `policy/engine.ts` + `policy.config.json` | Nine ordered checks (kill switch, detector failure, confidence, ambiguity band, allowlist, irreversible threshold, hourly rate caps, required evidence, approval), each recorded in `checks_run`. Chargeback `required_evidence` is populated **per reason code** from the detector's taxonomy, and the container wires `getMissingEvidence` so check 8 is live. One-directional: escalation can never become approval. |
 | **Action Executor** | `execution/actionExecutor.ts` | Idempotency-keyed, timeout, probe-downstream-then-retry-once, escalate on double failure. Allowlist re-checked as the last line of defense. Downstream call remains a documented test-mode stub. |
@@ -265,7 +265,7 @@ Coverage concentrates on detectors, policy, execution, and the agent layer. Fron
 
 ## Environment Configuration
 
-Backend reads `.env` from `risk-manager/backend/` (see `backend/.env.example` — now accurate): `PORT`, `NODE_ENV`, `DB_DRIVER` (file|mongo), `MONGODB_URI`, `DATA_DIR`, `LLM_PROVIDER` (mock|openrouter), `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` (free-tier default), `LLM_TIMEOUT_MS`, `DETECTOR_TIMEOUT_MS`, `PAYMENT_PROVIDER` (mock|razorpay), `RAZORPAY_KEY_ID/KEY_SECRET/WEBHOOK_SECRET`, `DEMO_API_KEY`, `REQUIRE_API_KEY`, `CORS_ORIGINS`, `LOG_LEVEL`. Frontend: `VITE_DEMO_API_KEY` (see `frontend/.env.example`).
+Backend reads `.env` from `risk-manager/backend/` (see `backend/.env.example` — now accurate): `PORT`, `NODE_ENV`, `DB_DRIVER` (file|mongo), `MONGODB_URI`, `DATA_DIR`, `LLM_PROVIDER` (mock|gemini), `GEMINI_API_KEY`, `GEMINI_MODEL` (`gemini-2.0-flash` default), `LLM_TIMEOUT_MS`, `DETECTOR_TIMEOUT_MS`, `PAYMENT_PROVIDER` (mock|razorpay), `RAZORPAY_KEY_ID/KEY_SECRET/WEBHOOK_SECRET`, `DEMO_API_KEY`, `REQUIRE_API_KEY`, `CORS_ORIGINS`, `LOG_LEVEL`. Frontend: `VITE_DEMO_API_KEY` (see `frontend/.env.example`).
 
 Policy thresholds live in the versioned `backend/src/policy/policy.config.json` (not env vars), viewable live at `GET /api/policy/config`.
 
@@ -328,7 +328,7 @@ Known caveat: with the bundled demo tools the maximum achievable win probability
 
 **General:**
 - All data is synthetic; the audit log persists to JSON files or MongoDB (audit + idempotency only); transactions/orders are stateless per-request payloads.
-- The LLM is a deterministic mock by default (`LLM_PROVIDER=mock`); with `openrouter` configured, any LLM failure falls back to the mock and escalates.
+- The LLM is a deterministic mock by default (`LLM_PROVIDER=mock`); with `gemini` configured, any LLM failure falls back to the mock and escalates.
 
 # Planned Improvements
 
