@@ -1,0 +1,54 @@
+# Render Blueprint — Risk Manager backend (Track 02 demo).
+#
+# Deploy: push this repo to GitHub, then Render Dashboard → New → Blueprint →
+# select the repo. Render reads this file from the REPO ROOT (this file's
+# location) and provisions the backend service.
+#
+# This repo is a monorepo: the app lives in risk-manager/. rootDir points the
+# service at that folder, so build/start commands below run with
+# risk-manager/ as the working directory (same paths as the local workflow).
+#
+# Requirements it sets:
+#  - Long-running Express server (not serverless) — Render Web Service.
+#  - DB_DRIVER=mongo against MongoDB Atlas free tier (set MONGODB_URI in the
+#    Render dashboard after creating the Atlas cluster; do NOT commit it).
+#  - The hash-chained audit log must persist across deploys — hence a real
+#    database, not the container filesystem.
+services:
+  - type: web
+    name: risk-manager-backend
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: risk-manager
+    buildCommand: cd shared && npm install && npm run build && cd ../backend && npm install && npm run build
+    startCommand: cd backend && node dist/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: DB_DRIVER
+        value: mongo
+      # Set in the Render dashboard (secret): mongodb+srv://… Atlas free-tier URI
+      - key: MONGODB_URI
+        sync: false
+      - key: LLM_PROVIDER
+        value: mock
+      # Optional (secret): set to enable the real OpenRouter LLM path
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: PAYMENT_PROVIDER
+        value: mock
+      - key: DEMO_API_KEY
+        value: demo-key
+      - key: REQUIRE_API_KEY
+        value: "true"
+      # Set in the dashboard to your Vercel frontend URL(s), comma-separated.
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DETECTOR_TIMEOUT_MS
+        value: "5000"
+      - key: LLM_TIMEOUT_MS
+        value: "15000"

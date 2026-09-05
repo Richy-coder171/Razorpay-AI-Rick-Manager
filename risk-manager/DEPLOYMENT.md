@@ -18,8 +18,8 @@ is always documented in the main README.
 
 ## 0. Prerequisites
 
-- GitHub repo containing `risk-manager/` **as the repo root** (the configs
-  below assume it; if `risk-manager/` is a subfolder, adjust the `cd` paths)
+- GitHub repo (this repo is a monorepo: the app lives in `risk-manager/`; the
+  blueprint `render.yaml` sits at the repo root and sets `rootDir: risk-manager`)
 - Accounts: Render, Vercel (or Netlify), MongoDB Atlas — all have free tiers
 - No real payment credentials anywhere; demo keys only (demo/test mode)
 
@@ -36,8 +36,9 @@ is always documented in the main README.
 
 ## 2. Backend on Render
 
-1. Render Dashboard → **New → Blueprint** → pick the repo (Render reads
-   `render.yaml` automatically)
+1. Render Dashboard → **New → Blueprint** → pick the repo (Render reads the
+   root-level `render.yaml` automatically; `rootDir: risk-manager` makes the
+   build/start commands run from the app folder)
 2. Set the secret env vars the blueprint marks `sync: false`:
    - `MONGODB_URI` — the Atlas URI from step 1
    - `CORS_ORIGINS` — your Vercel frontend URL(s) (set AFTER step 3, or edit
