@@ -1,0 +1,14 @@
+{
+  "name": "@risk-manager/shared",
+  "version": "1.0.0",
+  "description": "Shared snake_case contracts for the Risk Manager (imported by backend and frontend)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

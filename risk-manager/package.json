@@ -1,0 +1,27 @@
+{
+  "name": "risk-manager",
+  "version": "1.0.0",
+  "description": "Razorpay AI Risk Manager - Buildathon Track 02",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "evaluate": "cd backend && npm run evaluate",
+    "generate-data": "cd backend && npm run generate-data",
+    "smoke": "cd backend && npm run smoke",
+    "verify-audit": "cd backend && npm run verify-audit",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npx tsc --noEmit",
+    "lint:frontend": "cd frontend && npx tsc --noEmit"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

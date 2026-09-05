@@ -1,0 +1,99 @@
+{
+  "module": "fraud_spike",
+  "detector_version": "fraud-spike-v2",
+  "decision_threshold": 0.275,
+  "dataset": "held-out-test-v1",
+  "dataset_sha256": "33970dc8704039334b835d32274fb32b6ca0b7e8b9ce6a36e20cfc39b2d2fab6",
+  "generated_at": "2026-09-05T04:31:01.629Z",
+  "windows": 210,
+  "warmup_windows_excluded": 90,
+  "positives": 32,
+  "prevalence": 0.1524,
+  "precision": 0.875,
+  "recall": 0.6563,
+  "f1": 0.75,
+  "fpr": 0.0169,
+  "fnr": 0.3438,
+  "accuracy": 0.9333,
+  "pr_auc": 0.8726,
+  "brier_score": 0.0605,
+  "false_positive_cost_inr": 174311,
+  "false_positive_windows": 3,
+  "value_protected_inr": 5177000,
+  "confusion_matrix": {
+    "tp": 21,
+    "fp": 3,
+    "fn": 11,
+    "tn": 175
+  },
+  "reliability_curve": [
+    {
+      "bucket": "0.0-0.1",
+      "predicted_mean": 0.0587,
+      "observed_rate": 0.0139,
+      "count": 144
+    },
+    {
+      "bucket": "0.1-0.2",
+      "predicted_mean": 0.1324,
+      "observed_rate": 0.1818,
+      "count": 33
+    },
+    {
+      "bucket": "0.2-0.3",
+      "predicted_mean": 0.2481,
+      "observed_rate": 0.3333,
+      "count": 12
+    },
+    {
+      "bucket": "0.3-0.4",
+      "predicted_mean": 0.3117,
+      "observed_rate": 0.6667,
+      "count": 3
+    },
+    {
+      "bucket": "0.4-0.5",
+      "predicted_mean": 0.4365,
+      "observed_rate": 1,
+      "count": 3
+    },
+    {
+      "bucket": "0.5-0.6",
+      "predicted_mean": 0.5647,
+      "observed_rate": 1,
+      "count": 2
+    },
+    {
+      "bucket": "0.6-0.7",
+      "predicted_mean": 0.6414,
+      "observed_rate": 1,
+      "count": 3
+    },
+    {
+      "bucket": "0.7-0.8",
+      "predicted_mean": 0.7305,
+      "observed_rate": 1,
+      "count": 1
+    },
+    {
+      "bucket": "0.8-0.9",
+      "predicted_mean": 0.8481,
+      "observed_rate": 1,
+      "count": 4
+    },
+    {
+      "bucket": "0.9-1.0",
+      "predicted_mean": 0.9738,
+      "observed_rate": 1,
+      "count": 5
+    }
+  ],
+  "calibration": {
+    "method": "logistic_regression_fit_on_train_split",
+    "intercept": -2.505025,
+    "slope": 1.044662,
+    "fit_dev_brier": 0.0441,
+    "train_fit_converged": true
+  },
+  "notes": "Chronological 60/20/20 split, trailing-only baselines (current window excluded), threshold tuned on dev, reported on held-out test. False-positive cost = legitimate INR value in windows wrongly flagged."
+}

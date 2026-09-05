@@ -1,0 +1,45 @@
+{
+  "version": "policy-v2",
+  "global_kill_switch": false,
+  "modules": {
+    "fraud_spike": {
+      "escalation_band": [0.40, 0.60],
+      "auto_action_threshold": 0.90,
+      "require_confidence": "high",
+      "allowed_actions": ["auto_block_window", "flag_for_review", "no_action"],
+      "irreversible_actions": ["auto_block_window"],
+      "max_auto_actions_per_merchant_per_hour": 5
+    },
+    "return_risk": {
+      "escalation_band": [0.40, 0.60],
+      "auto_action_threshold": 0.92,
+      "require_confidence": "high",
+      "allowed_actions": ["allow_cod", "require_prepaid", "flag_for_manual_review", "block_order"],
+      "irreversible_actions": ["block_order"],
+      "max_auto_actions_per_merchant_per_hour": 10
+    },
+    "abuse_ring": {
+      "escalation_band": [0.40, 0.60],
+      "auto_action_threshold": 0.90,
+      "require_confidence": "high",
+      "allowed_actions": ["flag_ring_for_investigation", "restrict_accounts_pending_review", "no_action"],
+      "irreversible_actions": ["restrict_accounts_pending_review"],
+      "max_auto_actions_per_merchant_per_hour": 3
+    },
+    "chargeback": {
+      "escalation_band": [0.40, 0.60],
+      "auto_action_threshold": 0.90,
+      "require_confidence": "high",
+      "allowed_actions": ["auto_contest_full", "auto_contest_partial", "draft_for_human_review", "recommend_accept_loss"],
+      "irreversible_actions": ["auto_contest_full", "recommend_accept_loss"],
+      "max_auto_actions_per_merchant_per_hour": 5,
+      "required_evidence": {
+        "product_not_received": ["proof_of_delivery", "customer_communication", "tracking_info"],
+        "service_not_provided": ["proof_of_service", "customer_communication", "service_agreement"],
+        "fraudulent": ["avs_match", "device_fingerprint", "delivery_confirmation", "customer_ip"],
+        "duplicate": ["transaction_receipt", "customer_communication", "refund_proof"],
+        "not_as_described": ["product_description", "return_policy", "customer_communication"]
+      }
+    }
+  }
+}

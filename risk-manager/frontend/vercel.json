@@ -1,0 +1,22 @@
+# Vercel deployment for the frontend.
+#
+# Deploy: `npm i -g vercel && cd risk-manager && vercel` from the repo, or
+# import the repo in the Vercel dashboard with these settings:
+#   Root Directory: frontend
+#   Build Command:  (default — needs shared/ built first, see DEPLOYMENT.md)
+#   Output:         dist (Vite default)
+#
+# IMPORTANT: the frontend imports @risk-manager/shared via file:../shared, so
+# the build needs the shared package present. The recommended path is in
+# DEPLOYMENT.md (prebuild script). This config sets the framework + the
+# public API key env var pattern.
+
+build:
+  command: npm run build
+  outputDirectory: dist
+
+# Public demo values only (never secrets — VITE_* is embedded in the client).
+env:
+  VITE_DEMO_API_KEY: demo-key
+  # Set VITE_API_BASE_URL to your Render backend URL in the Vercel dashboard:
+  # VITE_API_BASE_URL: https://risk-manager-backend.onrender.com/api

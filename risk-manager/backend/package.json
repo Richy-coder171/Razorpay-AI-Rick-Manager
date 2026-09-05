@@ -1,0 +1,43 @@
+{
+  "name": "risk-manager-backend",
+  "version": "2.0.0",
+  "description": "Risk Manager Backend - Node.js + Express + TypeScript (Buildathon v2 spec)",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest --coverage",
+    "evaluate": "ts-node src/evaluation/run-evaluation.ts",
+    "generate-data": "ts-node src/data/generate-data.ts",
+    "verify-audit": "ts-node src/scripts/verify-audit-chain.ts",
+    "smoke": "ts-node src/scripts/smoke-test.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@risk-manager/shared": "file:../shared",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "mongodb": "^6.9.0",
+    "pino": "^9.4.0",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.0",
+    "@types/supertest": "^6.0.2",
+    "@types/uuid": "^10.0.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.2",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.3"
+  }
+}

@@ -1,0 +1,4 @@
+# Workspace-level ignores (risk-manager/.gitignore covers the app)
+*.log
+.DS_Store
+.vscode/

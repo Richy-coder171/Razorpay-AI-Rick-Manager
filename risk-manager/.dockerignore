@@ -1,0 +1,28 @@
+# Single root .dockerignore (build context = repo root for BOTH images).
+# Keep images lean; never ship secrets or generated state.
+**/node_modules
+**/dist
+**/coverage
+**/.git
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+
+# Backend image needs: shared/, backend/{src, evaluation, package files, tsconfig}.
+# Frontend image needs: shared/, frontend/ sources.
+# Exclusions below only prune what NEITHER build copies.
+
+# Frontend image never copies backend/ — except nothing. Backend image never
+# copies frontend/ sources. Exclude each from the other's needs is handled by
+# the Dockerfiles' COPY directives; this file only prunes bulky paths:
+
+backend/data
+backend/coverage
+backend/dist
+frontend/dist
+frontend/coverage
+
+# Python package + workspace docs are outside both builds.
+risk_manager
+__pycache__

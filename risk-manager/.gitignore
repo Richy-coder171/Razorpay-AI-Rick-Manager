@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Test coverage
+coverage/
+
+# Runtime state — the audit log and idempotency store are append-only runtime
+# artifacts, not source. (Contract tests run in an isolated temp DATA_DIR; a
+# server running while tests write was the bug that once corrupted this file —
+# see README "Failure Recovery".)
+backend/data/audit-log.json
+backend/data/idempotency.json
+backend/data/verified-payments.json
+backend/data/verified-transactions.json
+
+# IMPORTANT: backend/data/test/ is NOT ignored — it is the frozen, SHA-256-
+# checksummed dataset (train/dev/held-out + manifest.json) that the published
+# evaluation numbers depend on. Removing it would make the metrics
+# unreproducible. Do not add a blanket `data/` or `backend/data/` rule.
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

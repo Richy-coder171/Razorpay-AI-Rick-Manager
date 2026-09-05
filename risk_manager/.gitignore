@@ -1,0 +1,3 @@
+# Python package — stdlib only, no build artifacts expected
+__pycache__/
+*.pyc

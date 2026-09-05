@@ -1,0 +1,28 @@
+{
+  "dataset_name": "fraud-spike-held-out-test-v1",
+  "seed": 42,
+  "generated_at": "2026-09-04T06:42:10.385Z",
+  "files": [
+    {
+      "file": "data/test/train-train-v1.json",
+      "sha256": "66e11e2f0d02d125bb5f2dbe9c70b00371aae834a731e92a2f26073a3481b6bc",
+      "windows": 900,
+      "positives": 98,
+      "split": "train"
+    },
+    {
+      "file": "data/test/train-dev-v1.json",
+      "sha256": "e6a395ef05ca232513389a7cae995820bcd99d8264126711af34dd2b4a70cefc",
+      "windows": 300,
+      "positives": 29,
+      "split": "dev"
+    },
+    {
+      "file": "data/test/held-out-test-v1.json",
+      "sha256": "33970dc8704039334b835d32274fb32b6ca0b7e8b9ce6a36e20cfc39b2d2fab6",
+      "windows": 300,
+      "positives": 40,
+      "split": "test"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+# Risk Manager — full local stack.
+#
+#   docker compose up --build
+#     → frontend  http://localhost:5173
+#     → backend   http://localhost:3001/api/health
+#     → mongo     (internal, volume-backed)
+#
+# Compose defaults to DB_DRIVER=mongo so the MongoRepository driver (already
+# implemented in backend/src/models/repository.ts) is exercised with a real
+# MongoDB + volume persistence + healthcheck-gated startup. Non-Docker local
+# dev keeps DB_DRIVER=file (JSON repositories) as documented in the README.
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    # Not exposed to the host — only the backend reaches it on the compose network.
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      # Optional: supply backend/.env with secrets (OPENROUTER_API_KEY, …).
+      # Works from a clean checkout too — .env is gitignored and may be absent.
+      - path: backend/.env
+        required: false
+    environment:
+      # Compose defaults — override per deployment, not per machine.
+      DB_DRIVER: mongo
+      MONGODB_URI: mongodb://mongo:27017/risk-manager
+      PORT: "3001"
+      NODE_ENV: production
+      # Demo auth defaults (same as local dev); override via backend/.env.
+      DEMO_API_KEY: ${DEMO_API_KEY:-demo-key}
+      REQUIRE_API_KEY: ${REQUIRE_API_KEY:-true}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock}
+    ports:
+      - "3001:3001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
