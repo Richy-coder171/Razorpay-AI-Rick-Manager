@@ -1,11 +1,11 @@
 /**
  * LLM Provider interface (§11). The LLM is a PURE FUNCTION: structured facts
  * in, structured opinion out. Zero tools, zero function-calling definitions,
- * zero database/payment access. OpenRouterProvider for the real call (any
- * model on openrouter.ai, free-tier default), MockProvider as the
- * deterministic rule-based fallback used when the key is unset or the call
- * fails/times out — the fallback ALWAYS escalates, so a dead LLM degrades
- * safety margin rather than removing safety (§15).
+ * zero database/payment access. OpenRouterProvider / GeminiProvider for the
+ * real call, MockProvider as the deterministic rule-based fallback used when
+ * the key is unset or the call fails/times out — the fallback ALWAYS
+ * escalates, so a dead LLM degrades safety margin rather than removing
+ * safety (§15).
  */
 
 import { z } from 'zod';
@@ -82,7 +82,56 @@ export class OpenRouterProvider implements LLMProvider {
 }
 
 /**
- * Deterministic rule-based fallback. Used when OPENROUTER_API_KEY is unset or
+ * Gemini provider — same OpenAI-compatible chat/completions contract via
+ * Google's compatibility endpoint (no SDK dependency). The API key is read
+ * from config (GEMINI_API_KEY env var) and is NEVER hardcoded.
+ */
+export class GeminiProvider implements LLMProvider {
+  readonly name = 'gemini';
+
+  async complete(systemPrompt: string, userPrompt: string): Promise<string> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), config.llm_timeout_ms);
+
+    try {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${config.gemini_api_key}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: config.gemini_model,
+          max_tokens: 1024,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        throw new Error(`Gemini API error ${response.status}: ${body.slice(0, 300)}`);
+      }
+
+      const payload = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const text = payload.choices?.[0]?.message?.content ?? '';
+      if (!text) throw new Error('Gemini returned an empty completion');
+
+      logger.info({ model: config.gemini_model, chars: text.length }, 'gemini response received');
+      return text;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+}
+
+/**
+ * Deterministic rule-based fallback. Used when no real provider key is set or
  * the call fails/times out. Always conservative: escalate, low confidence.
  */
 export class MockProvider implements LLMProvider {
@@ -130,6 +179,9 @@ function extractDetectorJson(userPrompt: string): Record<string, unknown> | null
 export function getProvider(): LLMProvider {
   if (config.llm_provider === 'openrouter' && config.openrouter_api_key) {
     return new OpenRouterProvider();
+  }
+  if (config.llm_provider === 'gemini' && config.gemini_api_key) {
+    return new GeminiProvider();
   }
   return new MockProvider();
 }

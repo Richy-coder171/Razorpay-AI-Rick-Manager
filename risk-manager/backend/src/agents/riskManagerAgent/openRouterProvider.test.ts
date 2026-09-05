@@ -5,7 +5,7 @@
  * Network is stubbed; the key comes from config only.
  */
 
-import { OpenRouterProvider } from './provider';
+import { OpenRouterProvider, GeminiProvider } from './provider';
 import { config } from '../../config';
 
 const realFetch = global.fetch;
@@ -69,7 +69,9 @@ describe('OpenRouterProvider', () => {
     expect(headers.Authorization).toBe(`Bearer ${config.openrouter_api_key}`);
     // The request body never carries the key.
     const body = (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string;
-    expect(body).not.toContain(config.openrouter_api_key);
+    if (config.openrouter_api_key) {
+      expect(body).not.toContain(config.openrouter_api_key);
+    }
   });
 
   it('throws on non-2xx so the agent falls back to the mock', async () => {
@@ -82,5 +84,54 @@ describe('OpenRouterProvider', () => {
     stubFetch({ body: { choices: [{ message: { content: '' } }] } });
     const provider = new OpenRouterProvider();
     await expect(provider.complete('s', 'u')).rejects.toThrow(/empty completion/);
+  });
+});
+
+describe('GeminiProvider', () => {
+  it('sends the documented request shape: Bearer auth, model, system+user messages', async () => {
+    const fetchMock = stubFetch({
+      body: { choices: [{ message: { content: '{"module":"return_risk"}' } }] },
+    });
+    const provider = new GeminiProvider();
+
+    const text = await provider.complete('SYSTEM_PROMPT', 'USER_PROMPT');
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions');
+    expect(init.method).toBe('POST');
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe(`Bearer ${config.gemini_api_key}`);
+    expect(headers['Content-Type']).toBe('application/json');
+    const body = JSON.parse(init.body as string) as {
+      model: string;
+      messages: Array<{ role: string; content: string }>;
+    };
+    expect(body.model).toBe(config.gemini_model);
+    expect(body.messages).toEqual([
+      { role: 'system', content: 'SYSTEM_PROMPT' },
+      { role: 'user', content: 'USER_PROMPT' },
+    ]);
+    expect(text).toBe('{"module":"return_risk"}');
+  });
+
+  it('NEVER hardcodes an API key — sends exactly the configured one', async () => {
+    const fetchMock = stubFetch({ body: { choices: [{ message: { content: 'x' } }] } });
+    const provider = new GeminiProvider();
+    await provider.complete('s', 'u');
+
+    const headers = (fetchMock.mock.calls[0] as [string, RequestInit])[1].headers as Record<string, string>;
+    expect(headers.Authorization.startsWith('Bearer ')).toBe(true);
+    expect(headers.Authorization).toBe(`Bearer ${config.gemini_api_key}`);
+    const body = (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string;
+    if (config.gemini_api_key) {
+      expect(body).not.toContain(config.gemini_api_key);
+    }
+  });
+
+  it('throws on non-2xx so the agent falls back to the mock', async () => {
+    stubFetch({ status: 401, body: { error: { message: 'API key not valid' } } });
+    const provider = new GeminiProvider();
+    await expect(provider.complete('s', 'u')).rejects.toThrow(/401/);
   });
 });

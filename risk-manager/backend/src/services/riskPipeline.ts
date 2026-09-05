@@ -271,7 +271,9 @@ export class RiskPipeline {
   }
 
   private usesRealLlm(): boolean {
-    return config.llm_provider === 'openrouter' && !!config.openrouter_api_key;
+    if (config.llm_provider === 'openrouter') return !!config.openrouter_api_key;
+    if (config.llm_provider === 'gemini') return !!config.gemini_api_key;
+    return false;
   }
 }
 

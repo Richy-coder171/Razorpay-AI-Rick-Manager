@@ -33,6 +33,10 @@ services:
       # Optional (secret): set to enable the real OpenRouter LLM path
       - key: OPENROUTER_API_KEY
         sync: false
+      # Optional (secret): set to enable the real Gemini LLM path (Google AI
+      # Studio key). If used, also override LLM_PROVIDER to "gemini".
+      - key: GEMINI_API_KEY
+        sync: false
       - key: PAYMENT_PROVIDER
         value: mock
       - key: DEMO_API_KEY

@@ -45,6 +45,7 @@ services:
       REQUIRE_API_KEY: ${REQUIRE_API_KEY:-true}
       LLM_PROVIDER: ${LLM_PROVIDER:-mock}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock}
     ports:
       - "3001:3001"

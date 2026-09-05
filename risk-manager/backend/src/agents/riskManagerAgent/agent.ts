@@ -14,14 +14,14 @@ import {
   ModuleName,
   MODULE_ACTION_ALLOWLIST,
 } from '../../types';
-import { LLMProvider, getProvider } from './provider';
+import { LLMProvider, MockProvider, getProvider } from './provider';
 import { SYSTEM_PROMPT, buildUserPrompt } from './prompt';
 import { validateAgentOutput, GuardResult } from './agentOutputGuard';
 
 export interface AgentRunResult {
   agent_output: AgentOutput | null;
   guard: GuardResult;
-  llm_used: 'openrouter' | 'mock' | 'none';
+  llm_used: 'openrouter' | 'gemini' | 'mock' | 'none';
   failure_state?: string;
 }
 
@@ -52,16 +52,16 @@ export class RiskManagerAgent {
     }
 
     const userPrompt = buildUserPrompt(detectorOutput, context);
-
     let raw: string;
-    let llmUsed: 'openrouter' | 'mock' = this.provider.name === 'openrouter' ? 'openrouter' : 'mock';
+
+    const isRealProvider = this.provider.name === 'openrouter' || this.provider.name === 'gemini';
+    let llmUsed: 'openrouter' | 'gemini' | 'mock' = isRealProvider ? (this.provider.name as 'openrouter' | 'gemini') : 'mock';
 
     try {
       raw = await this.provider.complete(SYSTEM_PROMPT, userPrompt);
     } catch (err) {
       // §15: LLM failed -> deterministic rule-based fallback that always escalates.
-      const fallbackProvider = getProvider(); // mock when openrouter is configured but failed
-      const mockProvider = fallbackProvider.name === 'openrouter' ? await import('./provider').then((m) => new m.MockProvider()) : fallbackProvider;
+      const mockProvider = isRealProvider ? new MockProvider() : this.provider;
       raw = await mockProvider.complete(SYSTEM_PROMPT, userPrompt);
       llmUsed = 'mock';
     }
