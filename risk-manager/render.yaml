@@ -15,7 +15,11 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: cd shared && npm install && npm run build && cd ../backend && npm install && npm run build
+    # --include=dev: NODE_ENV=production (runtime env var) also applies to the
+    # build, which would otherwise skip devDependencies (@types/*, tsc) and
+    # break compilation. The final cp mirrors the Dockerfile: tsc does not
+    # emit JSON, and the server reads dist/policy/policy.config.json at boot.
+    buildCommand: cd shared && npm install --include=dev && npm run build && cd ../backend && npm install --include=dev && npm run build && cp src/policy/policy.config.json dist/policy/policy.config.json
     startCommand: cd backend && node dist/index.js
     healthCheckPath: /api/health
     envVars:
