@@ -41,7 +41,7 @@ export function loadConfig(): AppConfig {
     // so the provider is a plain chat/completions request. Any model name
     // from https://generativelanguage.googleapis.com works via GEMINI_MODEL.
     gemini_api_key: process.env.GEMINI_API_KEY || '',
-    gemini_model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    gemini_model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
     llm_timeout_ms: intEnv('LLM_TIMEOUT_MS', 15000),
     detector_timeout_ms: intEnv('DETECTOR_TIMEOUT_MS', 5000),
     payment_provider: (process.env.PAYMENT_PROVIDER as 'mock' | 'razorpay') || 'mock',
